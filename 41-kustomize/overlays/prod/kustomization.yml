@@ -1,0 +1,13 @@
+namespace: prod
+resources:
+- ../../base
+- namespace.yml
+labels:
+- pairs:
+    env: prod
+replicas:
+- name: frontend
+  count: 3
+images:
+- name: nginx
+  newTag: "1.28"

@@ -1,0 +1,36 @@
+## helm repo add autoscaler https://kubernetes.github.io/autoscaler
+## helm install vpa autoscaler/vertical-pod-autoscaler -n kube-system
+## needs metrics-server from 36-hpa.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpa-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vpa-demo
+  template:
+    metadata:
+      labels:
+        app: vpa-demo
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.29
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: vpa-demo
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: vpa-demo
+  updatePolicy:
+    updateMode: "Off"

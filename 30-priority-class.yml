@@ -1,0 +1,58 @@
+## Sized for t3.large (2 vCPU per kind node). Apply, then watch low pods get evicted for payment.
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: roboshop-critical
+value: 100000
+description: "payment and orders"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: batch-low
+value: 100
+description: "reports and other jobs that can wait"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: low
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: low
+  template:
+    metadata:
+      labels:
+        app: low
+    spec:
+      priorityClassName: batch-low
+      containers:
+      - name: nginx
+        image: nginx:1.29
+        resources:
+          requests:
+            cpu: 900m
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payment
+  template:
+    metadata:
+      labels:
+        app: payment
+    spec:
+      priorityClassName: roboshop-critical
+      containers:
+      - name: nginx
+        image: nginx:1.29
+        resources:
+          requests:
+            cpu: 900m

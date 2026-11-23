@@ -1,0 +1,11 @@
+grafana:
+  adminPassword: RoboShop@1
+  service:
+    type: NodePort
+    nodePort: 30080
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    retention: 1d
+alertmanager:
+  enabled: false

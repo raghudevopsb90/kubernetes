@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: roboshop
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql
+  namespace: roboshop
+  labels:
+    app: mysql
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.29
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: roboshop
+spec:
+  selector:
+    app: mysql
+  ports:
+  - port: 80
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: catalogue
+  namespace: roboshop
+  labels:
+    app: catalogue
+spec:
+  containers:
+  - name: client
+    image: busybox:1.37
+    command: ["sleep", "infinity"]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cart
+  namespace: roboshop
+  labels:
+    app: cart
+spec:
+  containers:
+  - name: client
+    image: busybox:1.37
+    command: ["sleep", "infinity"]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mysql
+  namespace: roboshop
+spec:
+  podSelector:
+    matchLabels:
+      app: mysql
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: catalogue
+    ports:
+    - port: 80

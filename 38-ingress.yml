@@ -1,0 +1,86 @@
+## kubectl apply -f https://kind.sigs.k8s.io/examples/ingress/deploy-ingress-nginx.yaml
+## pin the controller to the control-plane node, the one with ports 80/443 mapped in kind-config.yml
+## kubectl -n ingress-nginx patch deploy ingress-nginx-controller -p '{"spec":{"template":{"spec":{"nodeSelector":{"ingress-ready":"true"}}}}}'
+## kubectl -n ingress-nginx rollout status deploy ingress-nginx-controller
+## curl http://<ec2-public-ip>/  and  curl http://<ec2-public-ip>/catalogue
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.29
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+  - port: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalogue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalogue
+  template:
+    metadata:
+      labels:
+        app: catalogue
+    spec:
+      containers:
+      - name: echo
+        image: hashicorp/http-echo:1.0
+        args: ["-text=catalogue", "-listen=:8080"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalogue
+spec:
+  selector:
+    app: catalogue
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: roboshop
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /catalogue
+        pathType: Prefix
+        backend:
+          service:
+            name: catalogue
+            port:
+              number: 80
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80

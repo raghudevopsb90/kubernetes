@@ -1,0 +1,142 @@
+## helm install eg oci://docker.io/envoyproxy/gateway-helm --version v1.10.0 -n envoy-gateway-system --create-namespace
+## kind has no cloud load balancer, so reach the gateway with a port-forward:
+## kubectl -n envoy-gateway-system port-forward svc/$(kubectl -n envoy-gateway-system get svc -l gateway.envoyproxy.io/owning-gateway-name=roboshop -o name | cut -d/ -f2) 8888:80
+## curl localhost:8888/  and  curl localhost:8888/catalogue
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: eg
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: roboshop
+spec:
+  gatewayClassName: eg
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.29
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+  - port: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalogue-v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalogue
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: catalogue
+        version: v1
+    spec:
+      containers:
+      - name: echo
+        image: hashicorp/http-echo:1.0
+        args: ["-text=catalogue v1", "-listen=:8080"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalogue-v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalogue
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: catalogue
+        version: v2
+    spec:
+      containers:
+      - name: echo
+        image: hashicorp/http-echo:1.0
+        args: ["-text=catalogue v2", "-listen=:8080"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalogue-v1
+spec:
+  selector:
+    app: catalogue
+    version: v1
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalogue-v2
+spec:
+  selector:
+    app: catalogue
+    version: v2
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: roboshop
+spec:
+  parentRefs:
+  - name: roboshop
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /catalogue
+    backendRefs:
+    - name: catalogue-v1
+      port: 80
+      weight: 80
+    - name: catalogue-v2
+      port: 80
+      weight: 20
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: frontend
+      port: 80

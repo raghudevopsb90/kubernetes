@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: frontend
+  labels:
+    app: roboshop
+    component: frontend
+    env: dev
+  annotations:
+    owner: raghu
+    description: "RoboShop web page served by nginx"
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.29
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: catalogue
+  labels:
+    app: roboshop
+    component: catalogue
+    env: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.29

@@ -1,0 +1,28 @@
+## kubectl drain learn-worker --ignore-daemonsets --delete-emptydir-data
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: orders
+  template:
+    metadata:
+      labels:
+        app: orders
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.29
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: orders
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: orders

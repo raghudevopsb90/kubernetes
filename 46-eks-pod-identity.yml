@@ -1,0 +1,28 @@
+## aws ssm put-parameter --name /roboshop/dev/catalogue/MYSQL_PASSWORD --type SecureString --value 'RoboShop@1' --overwrite
+## kubectl logs ssm-reader
+## The role and the pod identity association are in 44-eks-cluster/pod-identity.tf (ssm-reader)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ssm-reader
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ssm-reader
+spec:
+  serviceAccountName: ssm-reader
+  containers:
+  - name: aws
+    image: amazon/aws-cli:2.31.0
+    command: ["sh", "-c", "aws ssm get-parameter --name /roboshop/dev/catalogue/MYSQL_PASSWORD --with-decryption --query Parameter.Value --output text; sleep infinity"]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: no-identity
+spec:
+  containers:
+  - name: aws
+    image: amazon/aws-cli:2.31.0
+    command: ["sh", "-c", "aws ssm get-parameter --name /roboshop/dev/catalogue/MYSQL_PASSWORD --with-decryption --query Parameter.Value --output text; sleep infinity"]

@@ -1,0 +1,11 @@
+## kubectl label node learn-worker disk=ssd
+apiVersion: v1
+kind: Pod
+metadata:
+  name: needs-ssd
+spec:
+  nodeSelector:
+    disk: ssd
+  containers:
+  - name: nginx
+    image: nginx:1.29

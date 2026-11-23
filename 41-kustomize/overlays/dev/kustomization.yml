@@ -1,0 +1,7 @@
+namespace: dev
+resources:
+- ../../base
+- namespace.yml
+labels:
+- pairs:
+    env: dev

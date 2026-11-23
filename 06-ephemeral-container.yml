@@ -1,0 +1,10 @@
+## The pause image has no shell, so kubectl exec cannot help here
+## kubectl debug -it no-shell --image=busybox:1.37 --target=app
+apiVersion: v1
+kind: Pod
+metadata:
+  name: no-shell
+spec:
+  containers:
+  - name: app
+    image: registry.k8s.io/pause:3.10
