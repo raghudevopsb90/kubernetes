@@ -7,15 +7,7 @@ spec:
   - name: download
     image: busybox:1.37
     command: ["sh", "-c", "wget -O /work/index.html https://raw.githubusercontent.com/raghudevopsb90/roboshop-microservices/main/00-overview.md"]
-    volumeMounts:
-    - name: html
-      mountPath: /work
   containers:
   - name: nginx
     image: nginx:1.29
-    volumeMounts:
-    - name: html
-      mountPath: /usr/share/nginx/html
-  volumes:
-  - name: html
-    emptyDir: {}
+
