@@ -6,9 +6,9 @@ metadata:
     app: roboshop
     component: frontend
     env: dev
-  annotations:
-    kubernetes.io/pod/owner: raghu
-    kubernetes.io/pod/description: "RoboShop web page served by nginx"
+#   annotations:
+#     kubernetes.io/pod/owner: raghu
+#     kubernetes.io/pod/description: "RoboShop web page served by nginx"
 spec:
   containers:
   - name: nginx
