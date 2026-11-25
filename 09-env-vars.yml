@@ -20,3 +20,12 @@ spec:
       valueFrom:
         fieldRef:
           fieldPath: spec.nodeName
+    - name: BUILDER_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.annotations['builder']
+    - name: APP_BUILD_VERSION
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.annotations['build.version']
+
