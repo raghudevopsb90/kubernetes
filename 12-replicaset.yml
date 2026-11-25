@@ -1,3 +1,15 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: catalogue-1
+  labels:
+    app: frontend
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.29
+---
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
@@ -15,15 +27,4 @@ spec:
       containers:
       - name: nginx
         image: nginx:1.29
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: catalogue-1
-  labels:
-    app: frontend
-spec:
-  containers:
-  - name: nginx
-    image: nginx:1.29
 
