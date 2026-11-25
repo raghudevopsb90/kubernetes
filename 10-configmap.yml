@@ -22,6 +22,8 @@ spec:
     volumeMounts:
     - name: html
       mountPath: /usr/share/nginx/html
+    - name: cm
+      mountPath: /opt/cm
   volumes:
   - name: html
     configMap:
@@ -29,3 +31,7 @@ spec:
       items:
       - key: index.html
         path: index.html
+  - name: cm
+    configMap:
+      name: catalogue
+
