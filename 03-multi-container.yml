@@ -6,6 +6,15 @@ spec:
   containers:
   - name: nginx
     image: nginx:1.29
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html
   - name: writer
     image: busybox:1.37
-    command: ["sh", "-c", "while true; do date > /data/index.html; sleep 5; done"]
+    command: ["sh", "-c", "while true; do date > /html/index.html; sleep 5; done"]
+    volumeMounts:
+    - name: html
+      mountPath: /html
+  volumes:
+  - name: html
+    emptyDir: {}
